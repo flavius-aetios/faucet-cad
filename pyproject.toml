@@ -1,0 +1,17 @@
+[project]
+name = "faucet-cad"
+version = "0.1.0"
+description = "Parametric CAD workspace for CadQuery and OCP CAD Viewer"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "cadquery>=2.8,<2.9",
+    "ipykernel>=7,<8",
+    "ocp-vscode>=4.0.1,<4.1",
+    "matplotlib>=3.10,<4",
+    # This Windows pair avoids the native shutdown crash seen with NLopt 2.11.
+    "nlopt==2.9.1; sys_platform == 'win32'",
+    "casadi==3.8.0; sys_platform == 'win32'",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "OCP: Show faucet adapter",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["${workspaceFolder}/model.py", "--view"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": [],
+      "group": {"kind": "build", "isDefault": true},
+      "presentation": {"reveal": "always", "panel": "dedicated"}
+    }
+  ]
+}

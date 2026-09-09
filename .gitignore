@@ -1,0 +1,26 @@
+.venv/
+.uv-cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+debug.log
+
+# Generated CAD and mesh files
+*.3mf
+*.brep
+*.step
+*.stl
+*.stp
+
+# Keep printable deliverables when cloning on another computer.
+!output/*.3mf
+!output/*.brep
+!output/*.step
+!output/*.stl
+!output/*.stp
+
+# OCP CAD Viewer runtime files
+.ocp_vscode/
+.diagnostics/
+.runtime-cache/

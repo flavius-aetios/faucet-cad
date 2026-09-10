@@ -9,58 +9,58 @@
   },
   "socket_gauge_ID_22.2": {
     "step_valid": true,
-    "triangles": 2792,
+    "triangles": 41372,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1435.12
+    "mesh_volume_mm3": 2073.04
   },
   "socket_gauge_ID_22.4": {
     "step_valid": true,
-    "triangles": 2796,
+    "triangles": 29164,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1407.03
+    "mesh_volume_mm3": 2044.85
   },
   "socket_gauge_ID_22.6": {
     "step_valid": true,
-    "triangles": 2800,
+    "triangles": 52744,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1378.62
+    "mesh_volume_mm3": 2016.87
   },
   "pin_gauge_OD_22.3": {
     "step_valid": true,
-    "triangles": 5388,
+    "triangles": 80210,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 2883.22
+    "mesh_volume_mm3": 3522.61
   },
   "pin_gauge_OD_22.4": {
     "step_valid": true,
-    "triangles": 5396,
+    "triangles": 53086,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 2939.5
+    "mesh_volume_mm3": 3578.88
   },
   "pin_gauge_OD_22.5": {
     "step_valid": true,
-    "triangles": 5398,
+    "triangles": 67506,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 2996.11
+    "mesh_volume_mm3": 3635.7
   },
   "pin_gauge_OD_22.6": {
     "step_valid": true,
-    "triangles": 5402,
+    "triangles": 76668,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 3053.03
+    "mesh_volume_mm3": 3692.84
   }
 }

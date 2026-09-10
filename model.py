@@ -95,6 +95,63 @@ def coupon(inner_d, outer_d, height, slot=13):
     return ring.cut(opening).clean()
 
 
+def label_coupon(sample, diameter, kind, body_diameter):
+    """Integral identification tab, behind the ring and clear of both fits."""
+    import matplotlib
+
+    font = Path(matplotlib.get_data_path()) / "fonts" / "ttf" / "DejaVuSans-Bold.ttf"
+    center_y = -body_diameter / 2 - 5
+    tab = (cq.Workplane("XY").center(0, center_y).rect(24, 14).extrude(2)
+           .edges("|Z").fillet(1).val())
+    result = sample.fuse(tab)
+    # Raised strokes print as three 0.2 mm layers above the 2 mm tab.
+    for text, size, offset in ((kind, 3.8, 2.7), (f"{diameter:.1f}", 5.0, -2.5)):
+        lettering = (cq.Workplane("XY", origin=(0, center_y + offset, 1.9))
+                     .text(text, size, 0.7, fontPath=str(font),
+                           halign="center", valign="center", combine=False).val())
+        result = result.fuse(lettering)
+    result = result.clean()
+    # The additions must not change material anywhere inside the original ring
+    # footprint, including either bore, the entry chamfer and the lateral slot.
+    envelope = cylinder(body_diameter/2, sample.BoundingBox().zmax + 1)
+    assert result.cut(sample).intersect(envelope).Volume() < 1e-6
+    return result
+
+
+def preview_labels(samples, out):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+    fig = plt.figure(figsize=(10, 7), facecolor="#f3f5f7")
+    for index, (label, sample) in enumerate(samples, 1):
+        ax = fig.add_subplot(1, 2, index, projection="3d")
+        ax.set_facecolor("#f3f5f7")
+        vertices, triangles = sample.tessellate(0.03, 0.08)
+        points = [v.toTuple() for v in vertices]
+        faces = [[points[j] for j in t] for t in triangles]
+        # Darken raised lettering only for readability in this illustration.
+        colors = ["#634025" if all(v[1] < -15.5 and v[2] > 2.05 for v in f)
+                  else "#f09b48" for f in faces]
+        ax.add_collection3d(Poly3DCollection(faces, facecolors=colors, linewidth=0,
+                                            shade=True))
+        ax.set(xlim=(-18, 18), ylim=(-30, 18), zlim=(0, 25))
+        ax.set_box_aspect((36, 48, 25))
+        # A top view avoids painter-order artifacts over the small raised text.
+        ax.view_init(elev=90, azim=-90)
+        ax.set_proj_type("ortho")
+        ax.set_axis_off()
+        ax.set_title(label, fontsize=13)
+    fig.suptitle("Маркировка образцов · вид сверху", fontsize=17)
+    fig.text(0.5, 0.07, "IN — внутренний диаметр · OUT — наружный диаметр · Размеры в мм\n"
+             "Рельеф 0,6 мм. Надписи затемнены на иллюстрации; печать одним цветом.",
+             ha="center", fontsize=11)
+    fig.subplots_adjust(left=0, right=1, bottom=0.12, top=0.87)
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+
+
 def inspect_and_export(shape, path):
     if not shape.isValid() or len(shape.Solids()) != 1 or shape.Volume() <= 0:
         raise ValueError(f"Invalid solid: {path.name}")
@@ -183,11 +240,16 @@ def main():
               "stl_export": {"linear_tolerance_mm": 0.005, "angular_tolerance_rad": 0.03},
               "derived": meta, "parts": {}}
     report["parts"]["adapter_prototype"] = inspect_and_export(shape, out / "adapter_prototype")
+    labeled_samples = []
     for clearance in (0.2, 0.4, 0.6):
         d = p["head_spigot_diameter"] + clearance
         name = f"socket_gauge_ID_{d:.1f}"
-        report["parts"][name] = inspect_and_export(
-            coupon(d, p["body_diameter"], 5, p["side_slot_width"]), out / name)
+        sample = label_coupon(coupon(d, p["body_diameter"], 5, p["side_slot_width"]),
+                              d, "IN", p["body_diameter"])
+        report["parts"][name] = inspect_and_export(sample, out / name)
+        report["parts"][name].update(label=f"IN {d:.1f}", fit_region_unchanged=True)
+        if clearance == 0.4:
+            labeled_samples.append((f"На лейку · IN {d:.1f}", sample))
     for clearance in (0.2, 0.1, 0.0, -0.1):
         d = p["outlet_bore_diameter"] - clearance
         name = f"pin_gauge_OD_{d:.1f}"
@@ -199,7 +261,11 @@ def main():
         sample = sample.fuse(coupon(p["upper_passage_diameter"], p["body_diameter"],
                                     2, p["side_slot_width"]).translate((0, 0, -2))).clean()
         sample = sample.translate((0, 0, 2))
+        sample = label_coupon(sample, d, "OUT", p["body_diameter"])
         report["parts"][name] = inspect_and_export(sample, out / name)
+        report["parts"][name].update(label=f"OUT {d:.1f}", fit_region_unchanged=True)
+        if clearance == 0.0:
+            labeled_samples.append((f"В излив · OUT {d:.1f}", sample))
     refs = make_references(p, meta)
     assembly = cq.Assembly(name="REFERENCE_ASSEMBLY_DO_NOT_PRINT")
     assembly.add(shape, name="Adapter", color=cq.Color(0.95, 0.48, 0.12))
@@ -209,6 +275,7 @@ def main():
     report["reference_intersection_mm3"] = [round(shape.intersect(r).Volume(), 6) for r in refs]
     (out / "geometry_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     preview(shape, refs, out / "preview.png", p["correction_angle_deg"])
+    preview_labels(labeled_samples, out / "labeled_samples.png")
     print(json.dumps(report, indent=2))
     if args.view:
         from ocp_vscode import show

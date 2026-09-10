@@ -51,72 +51,86 @@
     "socket_gauge_ID_22.2": {
       "valid_brep": true,
       "solid_count": 1,
-      "volume_mm3": 1435.17,
+      "volume_mm3": 2073.08,
       "bounds_mm": [
         30.5,
-        29.046,
+        41.046,
         5.001
-      ]
+      ],
+      "label": "IN 22.2",
+      "fit_region_unchanged": true
     },
     "socket_gauge_ID_22.4": {
       "valid_brep": true,
       "solid_count": 1,
-      "volume_mm3": 1407.09,
+      "volume_mm3": 2044.89,
       "bounds_mm": [
         30.5,
-        29.046,
+        41.046,
         5.001
-      ]
+      ],
+      "label": "IN 22.4",
+      "fit_region_unchanged": true
     },
     "socket_gauge_ID_22.6": {
       "valid_brep": true,
       "solid_count": 1,
-      "volume_mm3": 1378.67,
+      "volume_mm3": 2016.91,
       "bounds_mm": [
         30.5,
-        29.046,
+        41.046,
         5.001
-      ]
+      ],
+      "label": "IN 22.6",
+      "fit_region_unchanged": true
     },
     "pin_gauge_OD_22.3": {
       "valid_brep": true,
       "solid_count": 1,
-      "volume_mm3": 2883.36,
+      "volume_mm3": 3522.74,
       "bounds_mm": [
         30.5,
-        29.046,
+        41.046,
         22.002
-      ]
+      ],
+      "label": "OUT 22.3",
+      "fit_region_unchanged": true
     },
     "pin_gauge_OD_22.4": {
       "valid_brep": true,
       "solid_count": 1,
-      "volume_mm3": 2939.64,
+      "volume_mm3": 3579.01,
       "bounds_mm": [
         30.5,
-        29.046,
+        41.046,
         22.002
-      ]
+      ],
+      "label": "OUT 22.4",
+      "fit_region_unchanged": true
     },
     "pin_gauge_OD_22.5": {
       "valid_brep": true,
       "solid_count": 1,
-      "volume_mm3": 2996.25,
+      "volume_mm3": 3635.84,
       "bounds_mm": [
         30.5,
-        29.046,
+        41.046,
         22.002
-      ]
+      ],
+      "label": "OUT 22.5",
+      "fit_region_unchanged": true
     },
     "pin_gauge_OD_22.6": {
       "valid_brep": true,
       "solid_count": 1,
-      "volume_mm3": 3053.18,
+      "volume_mm3": 3692.98,
       "bounds_mm": [
         30.5,
-        29.046,
+        41.046,
         22.002
-      ]
+      ],
+      "label": "OUT 22.6",
+      "fit_region_unchanged": true
     }
   },
   "reference_intersection_mm3": [

@@ -101,7 +101,7 @@ def label_coupon(sample, diameter, kind, body_diameter):
 
     font = Path(matplotlib.get_data_path()) / "fonts" / "ttf" / "DejaVuSans-Bold.ttf"
     center_y = -body_diameter / 2 - 5
-    tab = (cq.Workplane("XY").center(0, center_y).rect(24, 14).extrude(2)
+    tab = (cq.Workplane("XY").center(0, center_y).rect(16, 14).extrude(2)
            .edges("|Z").fillet(1).val())
     result = sample.fuse(tab)
     # Raised strokes print as three 0.2 mm layers above the 2 mm tab.

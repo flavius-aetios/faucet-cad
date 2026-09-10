@@ -1,58 +1,66 @@
 {
   "adapter_prototype": {
     "step_valid": true,
-    "triangles": 18636,
+    "triangles": 119100,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 15769.34
+    "mesh_volume_mm3": 16217.84
   },
   "socket_gauge_ID_22.2": {
     "step_valid": true,
-    "triangles": 1052,
+    "triangles": 2792,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1434.76
+    "mesh_volume_mm3": 1435.12
   },
   "socket_gauge_ID_22.4": {
     "step_valid": true,
-    "triangles": 1056,
+    "triangles": 2796,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1406.68
+    "mesh_volume_mm3": 1407.03
   },
   "socket_gauge_ID_22.6": {
     "step_valid": true,
-    "triangles": 1056,
+    "triangles": 2800,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1378.27
+    "mesh_volume_mm3": 1378.62
   },
-  "pin_gauge_OD_21.9": {
+  "pin_gauge_OD_22.3": {
     "step_valid": true,
-    "triangles": 1524,
+    "triangles": 5388,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1252.26
+    "mesh_volume_mm3": 2883.22
   },
-  "pin_gauge_OD_21.7": {
+  "pin_gauge_OD_22.4": {
     "step_valid": true,
-    "triangles": 1520,
+    "triangles": 5396,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1224.99
+    "mesh_volume_mm3": 2939.5
   },
-  "pin_gauge_OD_21.5": {
+  "pin_gauge_OD_22.5": {
     "step_valid": true,
-    "triangles": 1520,
+    "triangles": 5398,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1198.04
+    "mesh_volume_mm3": 2996.11
+  },
+  "pin_gauge_OD_22.6": {
+    "step_valid": true,
+    "triangles": 5402,
+    "closed_manifold": true,
+    "consistent_winding": true,
+    "connected_components": 1,
+    "mesh_volume_mm3": 3053.03
   }
 }

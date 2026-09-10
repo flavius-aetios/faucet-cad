@@ -1,0 +1,20 @@
+{
+  "original_0.03mm": {
+    "cad_surface_type": "BSPLINE",
+    "cad_samples": 4141,
+    "cad_max_sampled_deviation_from_ideal_bend_mm": 2.959402145563672e-08,
+    "stl_total_triangles": 18636,
+    "stl_outer_bend_triangles": 2677,
+    "stl_max_sampled_chord_error_mm": 0.10553421207411517,
+    "note": "Sampled comparison to the ideal circular bend; not a certified global error bound."
+  },
+  "refined_0.005mm": {
+    "cad_surface_type": "BSPLINE",
+    "cad_samples": 4141,
+    "cad_max_sampled_deviation_from_ideal_bend_mm": 2.959402145563672e-08,
+    "stl_total_triangles": 119100,
+    "stl_outer_bend_triangles": 11107,
+    "stl_max_sampled_chord_error_mm": 0.009415404561245566,
+    "note": "Sampled comparison to the ideal circular bend; not a certified global error bound."
+  }
+}

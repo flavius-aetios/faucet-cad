@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 os.environ.setdefault("MPLCONFIGDIR", str(ROOT / ".runtime-cache" / "matplotlib"))
 import cadquery as cq
+from OCP.BRepTools import BRepTools
 
 V = cq.Vector
 
@@ -32,7 +33,7 @@ def make_model(p):
         raise ValueError("Correction angle must be >0 and <=25 degrees.")
     socket_d = p["head_spigot_diameter"] + p["socket_diametral_clearance"]
     depth = p["head_spigot_height"] + p["socket_axial_clearance"]
-    pin_d = p["outlet_bore_diameter_assumed"] - p["outlet_diametral_clearance"]
+    pin_d = p["outlet_bore_diameter"] - p["outlet_diametral_clearance"]
     outer_r = p["body_diameter"] / 2
     pin_h = p["upper_insertion_depth"]
     passage = p["upper_passage_diameter"]
@@ -98,8 +99,10 @@ def inspect_and_export(shape, path):
     if not shape.isValid() or len(shape.Solids()) != 1 or shape.Volume() <= 0:
         raise ValueError(f"Invalid solid: {path.name}")
     cq.exporters.export(shape, str(path) + ".step")
-    shape.exportStl(str(path) + ".stl", tolerance=0.03,
-                    angularTolerance=0.08, relative=False)
+    # Remove any display triangulation before generating the print mesh.
+    BRepTools.Clean_s(shape.wrapped)
+    shape.exportStl(str(path) + ".stl", tolerance=0.005,
+                    angularTolerance=0.03, relative=False)
     bounds = shape.BoundingBox()
     return {"valid_brep": True, "solid_count": 1,
             "volume_mm3": round(shape.Volume(), 2),
@@ -111,7 +114,7 @@ def make_references(p, meta):
     head = cylinder(p["head_body_diameter"] / 2, 65, (0, 0, -65)).fuse(
         cylinder(p["head_spigot_diameter"] / 2, p["head_spigot_height"]))
     outer = cylinder(p["body_diameter"] / 2, 30, meta["top"], meta["axis"])
-    inner = cylinder(p["outlet_bore_diameter_assumed"] / 2, 32,
+    inner = cylinder(p["outlet_bore_diameter"] / 2, 32,
                      tuple(meta["top"][i] - meta["axis"][i] for i in range(3)), meta["axis"])
     return head, outer.cut(inner)
 
@@ -160,7 +163,7 @@ def preview(shape, refs, out, angle):
     fig.suptitle(f"Поворот {angle:g}° — предварительный угол по фото", fontsize=17)
     fig.text(0.5, 0.03,
         "Оранжевый — печатная деталь. Серый — условная геометрия смесителя.\n"
-        "Размеры гнезда излива, удержание и точный угол требуют проверки.",
+        "Излив Ø22,5 мм. Посадка, удержание и угол требуют примерки.",
         ha="center", fontsize=11, color="#455262")
     fig.subplots_adjust(bottom=0.14, top=0.86, left=0.02, right=0.98)
     fig.savefig(out, dpi=160)
@@ -177,17 +180,24 @@ def main():
     out.mkdir(exist_ok=True)
     shape, meta = make_model(p)
     report = {"status": "FIT_PROTOTYPE_PHOTO_ESTIMATED_ANGLE", "parameters": p,
+              "stl_export": {"linear_tolerance_mm": 0.005, "angular_tolerance_rad": 0.03},
               "derived": meta, "parts": {}}
     report["parts"]["adapter_prototype"] = inspect_and_export(shape, out / "adapter_prototype")
     for clearance in (0.2, 0.4, 0.6):
         d = p["head_spigot_diameter"] + clearance
         name = f"socket_gauge_ID_{d:.1f}"
-        report["parts"][name] = inspect_and_export(coupon(d, p["body_diameter"], 5), out / name)
-    for clearance in (0.1, 0.3, 0.5):
-        d = p["outlet_bore_diameter_assumed"] - clearance
+        report["parts"][name] = inspect_and_export(
+            coupon(d, p["body_diameter"], 5, p["side_slot_width"]), out / name)
+    for clearance in (0.2, 0.1, 0.0, -0.1):
+        d = p["outlet_bore_diameter"] - clearance
         name = f"pin_gauge_OD_{d:.1f}"
-        sample = coupon(p["upper_passage_diameter"], d, 5).fuse(
-            coupon(p["upper_passage_diameter"], p["body_diameter"], 2).translate((0, 0, -2))).clean()
+        h, chamfer = p["upper_insertion_depth"], p["entry_chamfer"]
+        # Full insertion length: a short ring cannot validate pin retention.
+        envelope = cylinder(d/2, h-chamfer).fuse(cq.Solid.makeCone(
+            d/2, d/2-chamfer, chamfer, V(0, 0, h-chamfer), V(0, 0, 1)))
+        sample = coupon(p["upper_passage_diameter"], d, h, p["side_slot_width"]).intersect(envelope)
+        sample = sample.fuse(coupon(p["upper_passage_diameter"], p["body_diameter"],
+                                    2, p["side_slot_width"]).translate((0, 0, -2))).clean()
         sample = sample.translate((0, 0, 2))
         report["parts"][name] = inspect_and_export(sample, out / name)
     refs = make_references(p, meta)

@@ -5,7 +5,7 @@
   "head_body_diameter": 28.5,
   "connector_max_diameter": 12.0,
   "hose_diameter": 11.0,
-  "socket_diametral_clearance": 0.4,
+  "socket_diametral_clearance": 0.6,
   "socket_axial_clearance": 1.0,
   "outlet_bore_diameter": 22.5,
   "outlet_diametral_clearance": 0.0,
@@ -14,5 +14,6 @@
   "body_diameter": 30.5,
   "bend_height": 24.0,
   "side_slot_width": 13.0,
-  "entry_chamfer": 0.6
+  "entry_chamfer": 0.6,
+  "pin_test_diameters": [22.7, 22.8, 22.9, 23.0]
 }

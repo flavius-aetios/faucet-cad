@@ -1,66 +1,50 @@
 {
   "adapter_prototype": {
     "step_valid": true,
-    "triangles": 119100,
+    "triangles": 121330,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 16217.84
-  },
-  "socket_gauge_ID_22.2": {
-    "step_valid": true,
-    "triangles": 41148,
-    "closed_manifold": true,
-    "consistent_winding": true,
-    "connected_components": 1,
-    "mesh_volume_mm3": 1849.11
-  },
-  "socket_gauge_ID_22.4": {
-    "step_valid": true,
-    "triangles": 28940,
-    "closed_manifold": true,
-    "consistent_winding": true,
-    "connected_components": 1,
-    "mesh_volume_mm3": 1820.93
+    "mesh_volume_mm3": 15968.02
   },
   "socket_gauge_ID_22.6": {
     "step_valid": true,
-    "triangles": 52520,
+    "triangles": 18354,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 1792.95
+    "mesh_volume_mm3": 1825.91
   },
-  "pin_gauge_OD_22.3": {
+  "pin_gauge_OD_22.7": {
     "step_valid": true,
-    "triangles": 79994,
+    "triangles": 22340,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 3298.68
+    "mesh_volume_mm3": 3562.26
   },
-  "pin_gauge_OD_22.4": {
+  "pin_gauge_OD_22.8": {
     "step_valid": true,
-    "triangles": 52870,
+    "triangles": 21952,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 3354.95
+    "mesh_volume_mm3": 3625.64
   },
-  "pin_gauge_OD_22.5": {
+  "pin_gauge_OD_22.9": {
     "step_valid": true,
-    "triangles": 67290,
+    "triangles": 22798,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 3411.77
+    "mesh_volume_mm3": 3682.49
   },
-  "pin_gauge_OD_22.6": {
+  "pin_gauge_OD_23.0": {
     "step_valid": true,
-    "triangles": 76452,
+    "triangles": 21942,
     "closed_manifold": true,
     "consistent_winding": true,
     "connected_components": 1,
-    "mesh_volume_mm3": 3468.91
+    "mesh_volume_mm3": 3740.63
   }
 }

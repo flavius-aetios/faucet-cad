@@ -95,20 +95,55 @@ def coupon(inner_d, outer_d, height, slot=13):
     return ring.cut(opening).clean()
 
 
+def stroke_label(text, center_y, digits=False):
+    """Font-independent, constant-width lettering for the small print coupons."""
+    width, xspan = 1.0, 2.4
+    height = 4.4 if digits else 2.8
+    a, b, c, d = (0, height), (xspan, height), (xspan, 0), (0, 0)
+    left, right = (0, height/2), (xspan, height/2)
+    segments = {"a": (a, b), "b": (b, right), "c": (right, c),
+                "d": (d, c), "e": (d, left), "f": (left, a), "g": (left, right)}
+    numbers = {"0": "abcdef", "1": "bc", "2": "abged", "3": "abgcd",
+               "4": "fgbc", "5": "afgcd", "6": "afgecd", "7": "abc",
+               "8": "abcdefg", "9": "abfgcd"}
+    letters = {"I": [((xspan/2, 0), (xspan/2, height))],
+               "N": [(d, a), (a, c), (c, b)],
+               "O": [(a, b), (b, c), (c, d), (d, a)],
+               "U": [(a, d), (d, c), (c, b)],
+               "T": [(a, b), ((xspan/2, height), (xspan/2, 0))]}
+    advances = [1.2 if ch == "." else xspan + width for ch in text]
+    x = -(sum(advances) + 0.6 * (len(text)-1))/2
+    y = center_y - (height + width)/2
+    parts = []
+    for ch, advance in zip(text, advances):
+        if ch == ".":
+            parts.append(cq.Workplane("XY", origin=(x+0.6, y+0.6, 1.9))
+                         .rect(1.2, 1.2).extrude(0.9).val())
+        else:
+            strokes = [segments[s] for s in numbers[ch]] if ch in numbers else letters[ch]
+            for start, end in strokes:
+                dx, dy = end[0]-start[0], end[1]-start[1]
+                origin = (x+width/2+(start[0]+end[0])/2,
+                          y+width/2+(start[1]+end[1])/2, 1.9)
+                parts.append(cq.Workplane("XY", origin=origin)
+                             .slot2D(math.hypot(dx, dy)+width, width,
+                                     math.degrees(math.atan2(dy, dx))).extrude(0.9).val())
+        x += advance + 0.6
+    return parts[0].fuse(*parts[1:]).clean()
+
+
 def label_coupon(sample, diameter, kind, body_diameter):
     """Integral identification tab, behind the ring and clear of both fits."""
-    import matplotlib
-
-    font = Path(matplotlib.get_data_path()) / "fonts" / "ttf" / "DejaVuSans-Bold.ttf"
     center_y = -body_diameter / 2 - 5
     tab = (cq.Workplane("XY").center(0, center_y).rect(16, 14).extrude(2)
            .edges("|Z").fillet(1).val())
     result = sample.fuse(tab)
-    # Raised strokes print as three 0.2 mm layers above the 2 mm tab.
-    for text, size, offset in ((kind, 3.8, 2.7), (f"{diameter:.1f}", 5.0, -2.5)):
-        lettering = (cq.Workplane("XY", origin=(0, center_y + offset, 1.9))
-                     .text(text, size, 0.7, fontPath=str(font),
-                           halign="center", valign="center", combine=False).val())
+    # 1 mm strokes, 1.2 mm square dot, and 0.8 mm relief above the tab.
+    for text, offset, digits in ((kind, 2.7, False), (f"{diameter:.1f}", -2.8, True)):
+        lettering = stroke_label(text, center_y+offset, digits)
+        bounds = lettering.BoundingBox()
+        assert bounds.xmin > -7 and bounds.xmax < 7
+        assert bounds.ymin > center_y-6 and bounds.ymax < center_y+6
         result = result.fuse(lettering)
     result = result.clean()
     # The additions must not change material anywhere inside the original ring
@@ -145,7 +180,7 @@ def preview_labels(samples, out):
         ax.set_title(label, fontsize=13)
     fig.suptitle("Маркировка образцов · вид сверху", fontsize=17)
     fig.text(0.5, 0.07, "IN — внутренний диаметр · OUT — наружный диаметр · Размеры в мм\n"
-             "Рельеф 0,6 мм. Надписи затемнены на иллюстрации; печать одним цветом.",
+             "Штрих 1 мм · Рельеф 0,8 мм · Надписи затемнены только на иллюстрации.",
              ha="center", fontsize=11)
     fig.subplots_adjust(left=0, right=1, bottom=0.12, top=0.87)
     fig.savefig(out, dpi=150)
@@ -236,22 +271,23 @@ def main():
     out = ROOT / "output"
     out.mkdir(exist_ok=True)
     shape, meta = make_model(p)
-    report = {"status": "FIT_PROTOTYPE_PHOTO_ESTIMATED_ANGLE", "parameters": p,
+    report = {"status": "SOCKET_SAMPLE_CONFIRMED_PIN_FIT_PENDING", "parameters": p,
+              "coupon_labels": {"stroke_width_mm": 1.0, "decimal_square_mm": 1.2,
+                                "relief_mm": 0.8},
               "stl_export": {"linear_tolerance_mm": 0.005, "angular_tolerance_rad": 0.03},
               "derived": meta, "parts": {}}
     report["parts"]["adapter_prototype"] = inspect_and_export(shape, out / "adapter_prototype")
     labeled_samples = []
-    for clearance in (0.2, 0.4, 0.6):
-        d = p["head_spigot_diameter"] + clearance
+    for d in (meta["socket_diameter"],):
         name = f"socket_gauge_ID_{d:.1f}"
         sample = label_coupon(coupon(d, p["body_diameter"], 5, p["side_slot_width"]),
                               d, "IN", p["body_diameter"])
         report["parts"][name] = inspect_and_export(sample, out / name)
         report["parts"][name].update(label=f"IN {d:.1f}", fit_region_unchanged=True)
-        if clearance == 0.4:
-            labeled_samples.append((f"На лейку · IN {d:.1f}", sample))
-    for clearance in (0.2, 0.1, 0.0, -0.1):
-        d = p["outlet_bore_diameter"] - clearance
+        labeled_samples.append((f"На лейку · IN {d:.1f}", sample))
+    for index, d in enumerate(p["pin_test_diameters"]):
+        if d <= p["upper_passage_diameter"] + 3 or d >= p["body_diameter"]:
+            raise ValueError("Pin test diameter does not fit the coupon wall/flange.")
         name = f"pin_gauge_OD_{d:.1f}"
         h, chamfer = p["upper_insertion_depth"], p["entry_chamfer"]
         # Full insertion length: a short ring cannot validate pin retention.
@@ -264,7 +300,7 @@ def main():
         sample = label_coupon(sample, d, "OUT", p["body_diameter"])
         report["parts"][name] = inspect_and_export(sample, out / name)
         report["parts"][name].update(label=f"OUT {d:.1f}", fit_region_unchanged=True)
-        if clearance == 0.0:
+        if index == 0:
             labeled_samples.append((f"В излив · OUT {d:.1f}", sample))
     refs = make_references(p, meta)
     assembly = cq.Assembly(name="REFERENCE_ASSEMBLY_DO_NOT_PRINT")

@@ -1,0 +1,91 @@
+{
+  "status": "PROPOSED_FLUSH_ROUNDED_VARIANT_REQUIRES_FIT_RECHECK",
+  "parameters": {
+    "design_status": "PROPOSED_FLUSH_ROUNDED_VARIANT_REQUIRES_FIT_RECHECK",
+    "correction_angle_deg": 13.0,
+    "head_spigot_diameter": 22.0,
+    "head_spigot_height": 23.0,
+    "head_body_diameter": 28.5,
+    "connector_max_diameter": 12.0,
+    "hose_diameter": 11.0,
+    "socket_diametral_clearance": 0.6,
+    "socket_axial_clearance": 1.0,
+    "outlet_bore_diameter": 22.5,
+    "outlet_diametral_clearance": -0.5,
+    "upper_insertion_depth": 20.0,
+    "upper_passage_diameter": 18.0,
+    "body_diameter": 28.5,
+    "bend_height": 24.0,
+    "side_slot_width": 12.0,
+    "entry_chamfer": 0.6,
+    "slot_edge_radius": 0.6,
+    "pin_test_diameters": [
+      23.0
+    ]
+  },
+  "coupon_labels": {
+    "stroke_width_mm": 1.0,
+    "decimal_square_mm": 1.2,
+    "relief_mm": 0.8
+  },
+  "stl_export": {
+    "linear_tolerance_mm": 0.005,
+    "angular_tolerance_rad": 0.03
+  },
+  "derived": {
+    "top": [
+      2.73445459923949,
+      0,
+      48.0
+    ],
+    "axis": [
+      0.224951054343865,
+      0,
+      0.9743700647852352
+    ],
+    "socket_diameter": 22.6,
+    "socket_depth": 24.0,
+    "pin_diameter": 23.0,
+    "slot_edge_radius": 0.6
+  },
+  "parts": {
+    "adapter_prototype": {
+      "valid_brep": true,
+      "solid_count": 1,
+      "volume_mm3": 13629.84,
+      "bounds_mm": [
+        32.565,
+        26.81,
+        69.943
+      ]
+    },
+    "socket_gauge_ID_22.6": {
+      "valid_brep": true,
+      "solid_count": 1,
+      "volume_mm3": 1445.79,
+      "bounds_mm": [
+        28.502,
+        38.798,
+        5.002
+      ],
+      "label": "IN 22.6",
+      "fit_region_unchanged": true
+    },
+    "pin_gauge_OD_23.0": {
+      "valid_brep": true,
+      "solid_count": 1,
+      "volume_mm3": 3646.59,
+      "bounds_mm": [
+        28.5,
+        38.798,
+        22.002
+      ],
+      "label": "OUT 23.0",
+      "fit_region_unchanged": true
+    }
+  },
+  "reference_intersection_mm3": [
+    0.0,
+    280.04201
+  ]
+}

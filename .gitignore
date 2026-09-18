@@ -19,6 +19,8 @@ debug.log
 !output/*.step
 !output/*.stl
 !output/*.stp
+!output/flush_v2/*.step
+!output/flush_v2/*.stl
 
 # OCP CAD Viewer runtime files
 .ocp_vscode/

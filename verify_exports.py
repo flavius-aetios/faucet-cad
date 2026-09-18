@@ -1,4 +1,5 @@
 """Check STEP roundtrip and closed, consistently wound STL triangle meshes."""
+import argparse
 import collections
 import json
 import math
@@ -7,7 +8,9 @@ from pathlib import Path
 
 import cadquery as cq
 
-out = Path(__file__).resolve().parent / "output"
+parser = argparse.ArgumentParser()
+parser.add_argument("--output-dir", type=Path, default=Path(__file__).resolve().parent / "output")
+out = parser.parse_args().output_dir
 report = json.loads((out / "geometry_report.json").read_text(encoding="utf-8"))
 checks = {}
 for name, metrics in report["parts"].items():

@@ -42,7 +42,8 @@ def make_model(p):
     assert socket_d > p["head_spigot_diameter"]
     assert outer_r - socket_d / 2 >= 2.0
     assert pin_d - passage >= 3.0
-    assert p["connector_max_diameter"] < slot < passage < pin_d
+    # Side installation is over the soft hose, not over its rigid connector.
+    assert p["hose_diameter"] < slot < passage < pin_d
     assert 0 < chamfer < pin_h
     radius = p["bend_height"] / math.sin(angle)
     frames = []
@@ -52,6 +53,12 @@ def make_model(p):
                         depth + radius * math.sin(t)),
                        (math.sin(t), 0, math.cos(t))))
     top, axis = frames[-1]
+    edge_radius = p.get("slot_edge_radius", 0.0)
+    meta = {"top": top, "axis": axis, "socket_diameter": socket_d,
+            "socket_depth": depth, "pin_diameter": pin_d, "slot_edge_radius": edge_radius}
+    if edge_radius:
+        body = rounded_adapter(p, frames, meta)
+        return body, meta
 
     body = cylinder(outer_r, depth).fuse(cq.Solid.makeLoft(
         [section(c, n, outer_r) for c, n in frames]))
@@ -84,8 +91,7 @@ def make_model(p):
         plane = cq.Plane(origin=c, xDir=(n[2], 0, -n[0]), normal=n)
         slot_wires.append(cq.Workplane(plane).center(0, 20).rect(slot, 40).val())
     body = body.cut(cq.Solid.makeLoft(slot_wires, ruled=True)).clean()
-    return body, {"top": top, "axis": axis, "socket_diameter": socket_d,
-                  "socket_depth": depth, "pin_diameter": pin_d}
+    return body, meta
 
 
 def coupon(inner_d, outer_d, height, slot=13):
@@ -93,6 +99,41 @@ def coupon(inner_d, outer_d, height, slot=13):
     opening = cq.Workplane("XY").box(slot, outer_d, height + 2,
                                      centered=(True, False, False)).translate((0, 0, -1)).val()
     return ring.cut(opening).clean()
+
+
+def rounded_coupon(inner_d, outer_d, height, slot, edge_radius):
+    part = coupon(inner_d, outer_d, height, slot)
+    if edge_radius:
+        part = part.fillet(edge_radius, cq.Workplane(obj=part).edges("|Z").vals()).clean()
+    return part
+
+
+def rounded_adapter(p, frames, meta):
+    """Loft already-rounded C profiles, avoiding fragile fillets at loft seams."""
+    outer_d, slot, fillet = p["body_diameter"], p["side_slot_width"], p["slot_edge_radius"]
+    socket_d, passage = meta["socket_diameter"], p["upper_passage_diameter"]
+    body = rounded_coupon(socket_d, outer_d, meta["socket_depth"], slot, fillet)
+    wires = []
+    for i, (c, n) in enumerate(frames):
+        # Spread the bore reduction across the bend, with zero end slopes.
+        # Concentrating it near the tilted shoulder produces a steep internal lip.
+        t = i / (len(frames) - 1)
+        blend = t*t*(3-2*t)
+        inner_d = socket_d*(1-blend) + passage*blend
+        section_part = rounded_coupon(inner_d, outer_d, 1, slot, fillet)
+        wire = cq.Workplane(obj=section_part).faces(">Z").val().outerWire().translate((0, 0, -1))
+        wire = wire.rotate((0, 0, 0), (0, 1, 0), math.degrees(math.atan2(n[0], n[2])))
+        wires.append(wire.translate(c))
+    body = body.fuse(cq.Solid.makeLoft(wires))
+    pin_d, h, chamfer = meta["pin_diameter"], p["upper_insertion_depth"], p["entry_chamfer"]
+    pin = rounded_coupon(passage, pin_d, h, slot, fillet)
+    envelope = cylinder(pin_d/2, h-chamfer).fuse(cq.Solid.makeCone(
+        pin_d/2, pin_d/2-chamfer, chamfer, V(0, 0, h-chamfer), V(0, 0, 1)))
+    pin = pin.intersect(envelope).rotate((0, 0, 0), (0, 1, 0), p["correction_angle_deg"])
+    body = body.fuse(pin.translate(meta["top"]))
+    body = body.cut(cq.Solid.makeCone(socket_d/2+chamfer, socket_d/2, chamfer,
+                                    V(0, 0, 0), V(0, 0, 1))).clean()
+    return body
 
 
 def stroke_label(text, center_y, digits=False):
@@ -167,10 +208,11 @@ def preview_labels(samples, out):
         points = [v.toTuple() for v in vertices]
         faces = [[points[j] for j in t] for t in triangles]
         # Darken raised lettering only for readability in this illustration.
-        colors = ["#634025" if all(v[1] < -15.5 and v[2] > 2.05 for v in f)
+        label_top = sample.BoundingBox().ymin + 12
+        colors = ["#634025" if all(v[1] < label_top and v[2] > 2.05 for v in f)
                   else "#f09b48" for f in faces]
         ax.add_collection3d(Poly3DCollection(faces, facecolors=colors, linewidth=0,
-                                            shade=True))
+                                            shade=True, antialiased=False))
         ax.set(xlim=(-18, 18), ylim=(-30, 18), zlim=(0, 25))
         ax.set_box_aspect((36, 48, 25))
         # A top view avoids painter-order artifacts over the small raised text.
@@ -232,7 +274,7 @@ def preview(shape, refs, out, angle):
             points = [v.toTuple() for v in vertices]
             poly = Poly3DCollection([[points[j] for j in t] for t in triangles],
                 facecolors=color, linewidth=0, alpha=alpha,
-                shade=True, zsort="average")
+                shade=True, zsort="average", antialiased=False)
             ax.add_collection3d(poly)
         ax.view_init(elev=elev, azim=azim)
         ax.set_proj_type("ortho")
@@ -266,12 +308,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--parameters", type=Path, default=ROOT / "parameters.json")
     parser.add_argument("--view", action="store_true")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "output")
     args = parser.parse_args()
     p = json.loads(args.parameters.read_text(encoding="utf-8"))
-    out = ROOT / "output"
-    out.mkdir(exist_ok=True)
+    out = args.output_dir
+    out.mkdir(exist_ok=True, parents=True)
     shape, meta = make_model(p)
-    report = {"status": "SOCKET_SAMPLE_CONFIRMED_PIN_FIT_PENDING", "parameters": p,
+    report = {"status": p.get("design_status", "SOCKET_SAMPLE_CONFIRMED_PIN_FIT_PENDING"), "parameters": p,
               "coupon_labels": {"stroke_width_mm": 1.0, "decimal_square_mm": 1.2,
                                 "relief_mm": 0.8},
               "stl_export": {"linear_tolerance_mm": 0.005, "angular_tolerance_rad": 0.03},
@@ -280,7 +323,8 @@ def main():
     labeled_samples = []
     for d in (meta["socket_diameter"],):
         name = f"socket_gauge_ID_{d:.1f}"
-        sample = label_coupon(coupon(d, p["body_diameter"], 5, p["side_slot_width"]),
+        sample = label_coupon(rounded_coupon(d, p["body_diameter"], 5, p["side_slot_width"],
+                                             p.get("slot_edge_radius", 0.0)),
                               d, "IN", p["body_diameter"])
         report["parts"][name] = inspect_and_export(sample, out / name)
         report["parts"][name].update(label=f"IN {d:.1f}", fit_region_unchanged=True)
@@ -293,9 +337,11 @@ def main():
         # Full insertion length: a short ring cannot validate pin retention.
         envelope = cylinder(d/2, h-chamfer).fuse(cq.Solid.makeCone(
             d/2, d/2-chamfer, chamfer, V(0, 0, h-chamfer), V(0, 0, 1)))
-        sample = coupon(p["upper_passage_diameter"], d, h, p["side_slot_width"]).intersect(envelope)
-        sample = sample.fuse(coupon(p["upper_passage_diameter"], p["body_diameter"],
-                                    2, p["side_slot_width"]).translate((0, 0, -2))).clean()
+        sample = rounded_coupon(p["upper_passage_diameter"], d, h, p["side_slot_width"],
+                                 p.get("slot_edge_radius", 0.0)).intersect(envelope)
+        sample = sample.fuse(rounded_coupon(p["upper_passage_diameter"], p["body_diameter"],
+                                    2, p["side_slot_width"], p.get("slot_edge_radius", 0.0))
+                             .translate((0, 0, -2))).clean()
         sample = sample.translate((0, 0, 2))
         sample = label_coupon(sample, d, "OUT", p["body_diameter"])
         report["parts"][name] = inspect_and_export(sample, out / name)

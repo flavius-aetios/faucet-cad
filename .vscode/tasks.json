@@ -10,6 +10,16 @@
       "problemMatcher": [],
       "group": {"kind": "build", "isDefault": true},
       "presentation": {"reveal": "always", "panel": "dedicated"}
+    },
+    {
+      "label": "OCP: Show flush rounded v2 proposal",
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "args": ["${workspaceFolder}/model.py", "--parameters", "${workspaceFolder}/parameters_flush_v2.json", "--output-dir", "${workspaceFolder}/output/flush_v2", "--view"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {"reveal": "always", "panel": "dedicated"}
     }
   ]
 }

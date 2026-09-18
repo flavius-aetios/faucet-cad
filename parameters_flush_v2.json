@@ -1,0 +1,21 @@
+{
+  "design_status": "PROPOSED_FLUSH_ROUNDED_VARIANT_REQUIRES_FIT_RECHECK",
+  "correction_angle_deg": 13.0,
+  "head_spigot_diameter": 22.0,
+  "head_spigot_height": 23.0,
+  "head_body_diameter": 28.5,
+  "connector_max_diameter": 12.0,
+  "hose_diameter": 11.0,
+  "socket_diametral_clearance": 0.6,
+  "socket_axial_clearance": 1.0,
+  "outlet_bore_diameter": 22.5,
+  "outlet_diametral_clearance": -0.5,
+  "upper_insertion_depth": 20.0,
+  "upper_passage_diameter": 18.0,
+  "body_diameter": 28.5,
+  "bend_height": 24.0,
+  "side_slot_width": 12.0,
+  "entry_chamfer": 0.6,
+  "slot_edge_radius": 0.6,
+  "pin_test_diameters": [23.0]
+}
